@@ -1,0 +1,5 @@
+Sample,Date,Trial,Cage,MouseID,Genotype,Group,Box,Box Position
+S1M.01,2/22/25,2,Cage1,1,WT,Saline,AG-Box1,D7
+S2M.01,2/22/25,2,Cage1,2,WT,MS+Nalexogel,AG-Box1,D8
+S3M.01,2/22/25,2,Cage1,3,WT,MS,AG-Box1,D9
+
