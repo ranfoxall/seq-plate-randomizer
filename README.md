@@ -24,7 +24,7 @@ This Python tool generates **randomized 96-well plate maps** for biological samp
 Run the script from the command line by providing your input CSV:
 
 ```bash
-python make_seq_plate_maps_balanced.py <input_csv>
+python make_seq_plate_maps_balanced.py <input_csv> plate_config_template.txt
 ```
 <input_csv>: Path to your CSV file containing at least the columns:
 Sample, Date, Group, Cage, Box, Box Position
@@ -67,14 +67,43 @@ S3M.01,2/22/25,2,Cage1,3,WT,MS,AG-Box1,D9
 ## Customizing Columns
 
 By default, the script displays **Sample** and **Date** in each well on the visual plate maps.  
-If you want to change which columns appear (for example, using `MouseID` or `Genotype`), you can update the `LINE1` and `LINE2` variables at the top of the script:
+You can customize which columns are displayed and how samples are balanced across plates by editing the configuration file:
 
-```python
-LINE1 = "Sample"  # first line in each well
-LINE2 = "Date"    # second line in each well
+## Customizing Columns
+
+By default, the script displays **Sample** and **Date** in each well on the visual plate maps.  
+You can customize which columns are displayed and how samples are balanced across plates by editing the configuration file:
+plate_config_template.txt
+
+
+### Visual labels in each well
+Set which columns appear on the two-line well labels:
+```txt
+WELL_LINE1=Sample
+WELL_LINE2=Date
 ```
-Important:
-The column names you set must match exactly the headers in your CSV file.
-The script relies on these columns to build the visual map; if a column name does not exist in the CSV, the corresponding well will appear empty.
-All other columns in your CSV are preserved in the master randomized sample sheet with plate and well assignments, so you can track additional metadata even if it isn’t displayed in the plate maps.
-This allows you to customize your visual output while keeping the underlying data intact for sequencing or analysis.
+You can replace these with any column names from your CSV (for example `MouseID`, `Genotype`, or `Treatment`).
+
+### Balancing samples across plates
+To balance samples across plates by specific metadata (such as treatment group or cage), edit:
+
+```txt
+BALANCE_COLUMNS=Group,Cage
+```
+
+You may include one or multiple columns separated by commas.
+
+### Secondary plate map information
+The secondary visual plate map (showing sample origin such as storage box and position) can also be customized:
+
+```text
+BOX_LINE1=Box
+BOX_LINE2=Box Position
+```
+
+### Important notes
+- Column names must **exactly match** the headers in your input CSV file.  
+- If a specified column is missing, the corresponding well text will appear blank.  
+- All columns from the original CSV are preserved in the **master randomized sample sheet**, including added plate and well assignments.  
+- Only the display and balancing behavior changes — your underlying data remain unchanged.
+
