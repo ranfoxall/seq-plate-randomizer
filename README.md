@@ -33,7 +33,7 @@ python make_seq_plate_maps_balanced.py <input_csv> [config_file]
 - `<input_csv>`: Path to your input CSV file. By default, the script expects the columns:
   `Sample`, `Date`, `Group`, `Cage`, `Box`, and `Box Position`.
 
-###Configuration file (optional, but recommended)
+## Configuration file (optional, but recommended)
 
 - `[config_file]`: `plate_config_template.txt` used to override
   default column names, balancing variables, or well label content. If no config file is provided,
