@@ -69,7 +69,7 @@ WELL_LINE2=Date
 
 These appear as two lines inside each well.
 
-Choose columns that help identify samples during plating:
+Choose columns that help identify samples during planning:
 - Sample + Date  
 - MouseID + Genotype  
 - Treatment + Timepoint  
@@ -88,7 +88,7 @@ Examples:
 - Freezer + Rack  
 - PlateID + Well  
 
-This is especially useful when pulling samples from storage boxes.
+This is especially useful when pulling samples from storage boxes to organize the randomized plates.
 
 ---
 
