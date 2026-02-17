@@ -3,15 +3,16 @@
 # =============================
 
 # Columns to display inside each well (2 lines)
-WELL_LINE1 = "Sample"
-WELL_LINE2 = "Date"
+WELL_LINE1 =Sample
+WELL_LINE2 =Date
 
 # Columns used for balancing/randomization
-BALANCE_COLUMNS = ["Group", "Cage"]
+BALANCE_COLUMNS = [Group,Cage]
 
 # Columns to show in secondary visual map (box map)
-BOX_LINE1 = "Box"
-BOX_LINE2 = "Box Position"
+BOX_LINE1 =Box
+BOX_LINE2 =Box Position
 
 # Random seed for reproducibility
 RANDOM_SEED = 42
+
