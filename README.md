@@ -64,15 +64,15 @@ These settings control what text appears inside each well and in the secondary b
 ## Main well labels (text inside each well)
 Choose two columns to display on the primary plate map:
 
-WELL_LINE1=Sample  
-WELL_LINE2=Date  
+WELL_LINE1=`Sample`  
+WELL_LINE2=`Date`  
 
 These appear as two lines inside each well.
 
 Choose columns that help identify samples during planning:
-- Sample + Date  
-- MouseID + Genotype  
-- Treatment + Timepoint  
+- `Sample` + `Date`  
+- `MouseID` + `Genotype`  
+- `Treatment` + `Timepoint`  
 
 ---
 
@@ -80,13 +80,13 @@ Choose columns that help identify samples during planning:
 
 This creates the second visual map showing where samples came from (box layout).
 
-BOX_LINE1=Box  
-BOX_LINE2=Box Position  
+BOX_LINE1=`Box`  
+BOX_LINE2=`Box Position`  
 
 Examples:
-- Box + Box Position  
-- Freezer + Rack  
-- PlateID + Well  
+- `Box` + `Box Position`  
+- `Freezer` + `Rack`  
+- `PlateID` + `Well`  
 
 This is especially useful when pulling samples from storage boxes to organize the randomized plates.
 
@@ -96,16 +96,16 @@ This is especially useful when pulling samples from storage boxes to organize th
 
 These columns control how samples are distributed across plates to avoid bias.
 
-BALANCE_COLUMNS=Group,Cage  
+BALANCE_COLUMNS=`Group`,`Cage`  
 
 The script spreads these categories as evenly as possible across plates.
 
 Choose variables that should not cluster together:
-- Treatment group  
-- Cage  
-- Batch  
-- Sex  
-- Timepoint  
+- `Treatment group`  
+- `Cage`  
+- `Batch`  
+- `Sex`  
+- `Timepoint`  
 
 You can include multiple columns:
 BALANCE_COLUMNS=`Group`,`Cage`,`Sex`
