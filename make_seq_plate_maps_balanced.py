@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys
 
-# =============================
+
 # COMMAND LINE INPUTS
-# =============================
+
 if len(sys.argv) < 2:
     print("\nUsage:")
     print("python make_seq_plate_maps_balanced.py <input_csv> [config_file]\n")
@@ -16,9 +16,9 @@ if len(sys.argv) < 2:
 INPUT_CSV = sys.argv[1]
 CONFIG_FILE = sys.argv[2] if len(sys.argv) >= 3 else None
 
-# =============================
+
 # DEFAULT SETTINGS
-# =============================
+
 # these will be overwritten by config if provided
 LINE1 = "Sample"
 LINE2 = "Date"
@@ -26,10 +26,11 @@ BALANCE_COLUMNS = ["Group","Cage"]
 BOX_LINE1 = "Box"
 BOX_LINE2 = "Box Position"
 RANDOM_SEED = 42
+OUTPUT_PREFIX = "SeqPlate"  # overwritten by PLATE_NAME in config
 
-# =============================
+
 # LOAD CONFIG IF PROVIDED
-# =============================
+
 if CONFIG_FILE:
     print(f"\nUsing config file: {CONFIG_FILE}")
     config = {}
@@ -50,28 +51,32 @@ if CONFIG_FILE:
     BOX_LINE1 = config.get("BOX_LINE1", BOX_LINE1)
     BOX_LINE2 = config.get("BOX_LINE2", BOX_LINE2)
     RANDOM_SEED = int(config.get("RANDOM_SEED", RANDOM_SEED))
+    OUTPUT_PREFIX = config.get("PLATE_NAME", OUTPUT_PREFIX)  # NEW
 
 print(f"Balancing by: {BALANCE_COLUMNS}")
-print(f"Well label: {LINE1} + {LINE2}\n")
+print(f"Well label: {LINE1} + {LINE2}")
+print(f"Plate name: {OUTPUT_PREFIX}\n")
 random.seed(RANDOM_SEED)
 
 # =============================
 # SETTINGS
 # =============================
 CONTROL_WELLS = {"H10": "DNA", "H11": "Extract", "H12": "Dup"}
-OUTPUT_PREFIX = "SeqPlate"
 
 rows = list("ABCDEFGH")
 cols = list(range(1,13))
 all_wells = [f"{r}{c}" for r in rows for c in cols]
+# Usable wells in row-major order, controls excluded — guarantees sequential fill, no gaps
 usable_wells = [w for w in all_wells if w not in CONTROL_WELLS]
 SAMPLES_PER_PLATE = len(usable_wells)
 
-# =============================
+
 # READ CSV
-# =============================
+
 df = pd.read_csv(INPUT_CSV)
 df = df.loc[:, ~df.columns.str.contains('^Unnamed')]  # remove extra unnamed cols
+df = df[df[LINE1].notna() & (df[LINE1].astype(str).str.strip() != "")]  # drop blank sample rows
+df = df.reset_index(drop=True)
 
 # Check required columns exist
 required_cols = [LINE1, LINE2, BOX_LINE1, BOX_LINE2] + BALANCE_COLUMNS
@@ -80,9 +85,9 @@ if missing:
     print(f"Error: The following required columns are missing from CSV: {missing}")
     sys.exit(1)
 
-# =============================
-# HELPER: ASSIGN PLATES (full first plates)
-# =============================
+
+# HELPER: ASSIGN PLATES (full first plates, no gaps)
+
 def assign_plates_full_first(df):
     total_samples = len(df)
     n_total_plates = math.ceil(total_samples / SAMPLES_PER_PLATE)
@@ -92,36 +97,34 @@ def assign_plates_full_first(df):
     all_samples = df.to_dict('records')
     random.shuffle(all_samples)
 
-    # Fill plates
+    # Fill plates sequentially — earlier plates fill completely before moving to next
     idx = 0
     for p in range(n_total_plates):
-        n_to_assign = SAMPLES_PER_PLATE if p < n_total_plates - 1 else total_samples - SAMPLES_PER_PLATE * (n_total_plates - 1)
-        for _ in range(n_to_assign):
+        while idx < total_samples and len(plates[p]) < SAMPLES_PER_PLATE:
             plates[p].append(all_samples[idx])
             idx += 1
     return plates
 
 plates = assign_plates_full_first(df)
-print(f"Total plates: {len(plates)}, Samples per plate (usable wells): {SAMPLES_PER_PLATE}\n")
+print(f"Total plates: {len(plates)}, Max samples per plate (usable wells): {SAMPLES_PER_PLATE}\n")
 
-# =============================
-# WELL ORDER
-# =============================
+
+# WELL ORDER: first n usable wells in sequence, no gaps
+
 def get_plate_wells(n):
-    return [w for w in all_wells if w not in CONTROL_WELLS][:n]
+    return usable_wells[:n]
 
-# =============================
 # EXCEL WRITER
-# =============================
+
 writer = pd.ExcelWriter(f"{OUTPUT_PREFIX}_AllPlates.xlsx", engine="openpyxl")
 assignment_rows = []
 
-# =============================
+
 # GENERATE PLATES
-# =============================
+
 for pnum, plate_samples in enumerate(plates, start=1):
     plate_name = f"{OUTPUT_PREFIX}_{pnum}"
-    print(f"Creating {plate_name}")
+    print(f"Creating {plate_name} ({len(plate_samples)} samples)")
     well_list = get_plate_wells(len(plate_samples))
     plate_map = {w: "" for w in all_wells}
 
@@ -178,16 +181,16 @@ for pnum, plate_samples in enumerate(plates, start=1):
     plt.savefig(f"{plate_name}_map.png", bbox_inches='tight')
     plt.close()
 
-# =============================
+
 # MASTER RANDOMIZED SHEET
-# =============================
+
 final_df = pd.DataFrame(assignment_rows)
 final_df.to_csv(f"{OUTPUT_PREFIX}_Randomized_Samples.csv", index=False)
 final_df.to_excel(writer, sheet_name="Randomized_All_Samples", index=False)
 writer.close()
 
 print("\nDONE — files created:")
-print("• Randomized sample sheet with plate+well")
+print(f"• {OUTPUT_PREFIX}_Randomized_Samples.csv")
+print(f"• {OUTPUT_PREFIX}_AllPlates.xlsx")
 print("• Visual plate CSVs (96-well layout, with Box info)")
-print("• PNG plate maps")
-print("• Master Excel workbook\n")
+print("• PNG plate maps\n")
